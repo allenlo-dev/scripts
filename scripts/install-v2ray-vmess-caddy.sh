@@ -405,7 +405,7 @@ function install_caddy_firewall() {
     echo ""
 
     systemctl restart caddy
-    systemctl start v2ray
+    systemctl restart v2ray
 
     #systemctl status caddy -l
     #reboot

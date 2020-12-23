@@ -3,6 +3,8 @@
 domain=""
 vless_id=""
 vless_path=""
+vmess_id=""
+vmess_path=""
 
 root_dir=""
 function judgment_param() {
@@ -30,12 +32,28 @@ function judgment_param() {
     fi
 
     if [ ! -n "$4" ]; then
+        vmess_id='26E3EA30-57B3-95C7-3424-2FD8EEFB814C'
+    else
+        vmess_id=$4
+    fi
+
+    if [ ! -n "$5" ]; then
+        vmess_path='/mess'
+    else
+        if [[ $5 =~ ^/.* ]]; then
+            vmess_path=$5
+        else
+            vmess_path="/$5"
+        fi
+    fi
+
+    if [ ! -n "$6" ]; then
         root_dir='/home/wwwroot'
     else
-        if [[ $4 =~ ^/.* ]]; then
-            root_dir=$4
+        if [[ $6 =~ ^/.* ]]; then
+            root_dir=$6
         else
-            root_dir="/$4"
+            root_dir="/$6"
         fi
     fi
 }
@@ -119,26 +137,25 @@ function sync_timezone() {
     date
 }
 
-#install v2ray
-function install_v2ray() {
-    if ! which v2ray > /dev/null; then
-        systemctl stop v2ray
-        systemctl disable v2ray
+#install xray
+function install_xray() {
+    if ! which xray > /dev/null; then
+        systemctl stop xray
+        systemctl disable xray
     fi
 
-    #bash <(curl -L -s https://install.direct/go.sh)
-    bash <(curl -L -s https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
-    systemctl enable v2ray
-    #systemctl start v2ray
+    bash <(curl -L -s https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
+    systemctl enable xray
+    #systemctl start xray
 
-    #config v2ray service
-    if [ -x /usr/local/bin/v2ray ]; then
-        json_path='/usr/local/etc/v2ray/config.json'
+    #config xray service
+    if [ -x /usr/local/bin/xray ]; then
+        json_path='/usr/local/etc/xray/config.json'
     else
-        json_path='/etc/v2ray/config.json'
+        json_path='/etc/xray/config.json'
     fi
 
-cat << EOF > ${json_path}
+cat << EOF > $json_path
 {
   "inbounds": [
     {
@@ -163,6 +180,28 @@ cat << EOF > ${json_path}
       }
     }
   ],
+  "inboundDetour": [
+    {
+      "port": 681,
+      "listen": "127.0.0.1",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "${vmess_id}",
+            "level": 1,
+            "alterId": 64
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "${vmess_path}"
+        }
+      }
+    }
+  ],
   "outbounds": [
     {
       "protocol": "freedom",
@@ -174,7 +213,7 @@ EOF
 }
 
 #install caddy
-function find_proxy_insert_line() {
+function find_proxy_insert_line_1() {
     line_num=$(sed -n -e "/${domain} {/=" /etc/caddy/Caddyfile)
     end_num=$(sed -n '$=' /etc/caddy/Caddyfile)
 
@@ -196,6 +235,40 @@ function find_proxy_insert_line() {
         line_num=$(sed -n -e "/allen@${domain}/=" /etc/caddy/Caddyfile)
     else
         sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        let line_num--
+    fi
+
+    return ${line_num}
+}
+
+function find_proxy_insert_line_2() {
+    line_num=$(sed -n -e "/${domain} {/=" /etc/caddy/Caddyfile)
+    end_num=$(sed -n '$=' /etc/caddy/Caddyfile)
+
+    find_result=0
+    while [ ${line_num} -le ${end_num} ]; do
+        let line_num++
+        proxy_str=$(sed -n "${line_num}p" /etc/caddy/Caddyfile)
+        if [ "${proxy_str}" == "}" ]; then
+            break
+        fi
+
+        if [[ ${proxy_str} =~ "127.0.0.1:681" ]]; then
+            find_result=1
+            break
+        fi
+    done
+
+    if [ ${find_result} -eq 0 ]; then
+        line_num=$(sed -n -e "/allen@${domain}/=" /etc/caddy/Caddyfile)
+    else
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        sed -i "${line_num} d" /etc/caddy/Caddyfile
         let line_num--
     fi
 
@@ -203,7 +276,21 @@ function find_proxy_insert_line() {
 }
 
 function insert_proxy_to_caddy_v1() {
-    find_proxy_insert_line
+    find_proxy_insert_line_2
+    line_num=$?
+    sed -i "${line_num} a\  proxy ${vmess_path} 127.0.0.1:681 {" /etc/caddy/Caddyfile
+    let line_num++
+
+    sed -i "${line_num} a\    websocket" /etc/caddy/Caddyfile
+    let line_num++
+
+    sed -i "${line_num} a\    header_upstream -Origin" /etc/caddy/Caddyfile
+    let line_num++
+
+    sed -i "${line_num} a\  }" /etc/caddy/Caddyfile
+    let line_num++
+
+    find_proxy_insert_line_1
     line_num=$?
     sed -i "${line_num} a\  proxy ${vless_path} 127.0.0.1:1521 {" /etc/caddy/Caddyfile
     let line_num++
@@ -218,8 +305,12 @@ function insert_proxy_to_caddy_v1() {
     let line_num++
 }
 
-function insert_proxy_to_caddy_v2() {
-    find_proxy_insert_line
+function insert_proxy_to_caddy_v2() { 
+    find_proxy_insert_line_2
+    line_num=$?
+    sed -i "${line_num} a\  reverse_proxy ${vmess_path} 127.0.0.1:681" /etc/caddy/Caddyfile
+
+    find_proxy_insert_line_1
     line_num=$?
     sed -i "${line_num} a\  reverse_proxy ${vless_path} 127.0.0.1:1521" /etc/caddy/Caddyfile
 }
@@ -231,6 +322,10 @@ ${domain} {
   root ${root_dir}/${domain}
   tls allen@${domain}
   proxy ${vless_path} 127.0.0.1:1521 {
+    websocket
+    header_upstream -Origin
+  }
+  proxy ${vmess_path} 127.0.0.1:681 {
     websocket
     header_upstream -Origin
   }
@@ -248,6 +343,7 @@ ${domain} {
   root * ${root_dir}/${domain}
   tls allen@${domain}
   reverse_proxy ${vless_path} 127.0.0.1:1521
+  reverse_proxy ${vmess_path} 127.0.0.1:681
 }
 EOF
 }
@@ -275,26 +371,40 @@ function install_caddy_firewall() {
             append_domain_to_caddy_v2
         fi
     fi
-    
+
     echo ""
     echo -e "\033[36m------------- Caddy Config ---------------\033[0m"
     cat /etc/caddy/Caddyfile
-    echo -e "\033[36m------- V2RAY Host Settings(VLESS) -------\033[0m"
+    echo ""
+    echo -e "\033[36m------- XRAY Host Settings(VLESS) -------\033[0m"
     echo "Address:    ${domain}"
     echo "Port:       443"
     echo "ID:         ${vless_id}"
     echo "FLow:       xtls-rprx-origin"
     echo "Encryption: none"
-    echo -e "\033[36m-------- V2RAY Transport Settings --------\033[0m"
+    echo -e "\033[36m-------- XRAY Transport Settings --------\033[0m"
     echo "Network:    ws"
     echo "Type:       none"
     echo "Host:       ${domain}"
     echo "Path        ${vless_path}"
     echo "TLS: tls    AllowInsecure: false"
     echo ""
+    echo -e "\033[36m------- XRAY Host Settings(VMESS) -------\033[0m"
+    echo "Address:    ${domain}"
+    echo "Port:       443"
+    echo "ID:         ${vmess_id}"
+    echo "FLow:       xtls-rprx-origin"
+    echo "Encryption: none"
+    echo -e "\033[36m-------- XRAY Transport Settings --------\033[0m"
+    echo "Network:    ws"
+    echo "Type:       none"
+    echo "Host:       ${domain}"
+    echo "Path        ${vmess_path}"
+    echo "TLS: tls    AllowInsecure: false"
+    echo ""
 
     systemctl restart caddy
-    systemctl restart v2ray
+    systemctl restart xray
 
     #systemctl status caddy -l
     #reboot
@@ -304,5 +414,5 @@ judgment_param "$@"
 check_os_type
 install_os_pkgage
 sync_timezone
-install_v2ray
+install_xray
 install_caddy_firewall

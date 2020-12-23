@@ -119,23 +119,22 @@ function sync_timezone() {
     date
 }
 
-#install v2ray
-function install_v2ray() {
-    if ! which v2ray > /dev/null; then
-        systemctl stop v2ray
-        systemctl disable v2ray
+#install xray
+function install_xray() {
+    if ! which xray > /dev/null; then
+        systemctl stop xray
+        systemctl disable xray
     fi
 
-    #bash <(curl -L -s https://install.direct/go.sh)
-    bash <(curl -L -s https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
-    systemctl enable v2ray
-    #systemctl start v2ray
+    bash <(curl -L -s https://raw.githubusercontent.com/XTLS/Xray-install/main/install-release.sh)
+    systemctl enable xray
+    #systemctl start xray
 
-    #config v2ray service
-    if [ -x /usr/local/bin/v2ray ]; then
-        json_path='/usr/local/etc/v2ray/config.json'
+    #config xray service
+    if [ -x /usr/local/bin/xray ]; then
+        json_path='/usr/local/etc/xray/config.json'
     else
-        json_path='/etc/v2ray/config.json'
+        json_path='/etc/xray/config.json'
     fi
 
 cat << EOF > ${json_path}
@@ -279,13 +278,13 @@ function install_caddy_firewall() {
     echo ""
     echo -e "\033[36m------------- Caddy Config ---------------\033[0m"
     cat /etc/caddy/Caddyfile
-    echo -e "\033[36m------- V2RAY Host Settings(VLESS) -------\033[0m"
+    echo -e "\033[36m------- XRAY Host Settings(VLESS) -------\033[0m"
     echo "Address:    ${domain}"
     echo "Port:       443"
     echo "ID:         ${vless_id}"
     echo "FLow:       xtls-rprx-origin"
     echo "Encryption: none"
-    echo -e "\033[36m-------- V2RAY Transport Settings --------\033[0m"
+    echo -e "\033[36m-------- XRAY Transport Settings --------\033[0m"
     echo "Network:    ws"
     echo "Type:       none"
     echo "Host:       ${domain}"
@@ -294,7 +293,7 @@ function install_caddy_firewall() {
     echo ""
 
     systemctl restart caddy
-    systemctl restart v2ray
+    systemctl restart xray
 
     #systemctl status caddy -l
     #reboot
@@ -304,5 +303,5 @@ judgment_param "$@"
 check_os_type
 install_os_pkgage
 sync_timezone
-install_v2ray
+install_xray
 install_caddy_firewall

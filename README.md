@@ -107,3 +107,31 @@ bash <(curl -L -s https://raw.githubusercontent.com/allenlo-dev/scripts/master/s
 on "[user1]='passwd1' [user2]='passwd2'"  
 #on "[user1]='passwd1' [user2]='passwd2'" "15 0  *  *  *"  
 #off  
+  
+11. 一键 xray vmess 版本  
+注意：使用前，请先把域名a记录的IP地址设置正确  
+参数：  
+xx.xxxx.com                             域名  
+9cf38986-5d2b-8158-1419-055ae1f90a08    VLESS协议使用的ID  
+myvless                                 VLESS的ws路径  
+04b87b96-e511-dc35-3ce9-37e0ccd24bd8    VMESS协议使用的ID  
+myvmess                                 VMESS的ws路径  
+  
+bash <(curl -L -s https://raw.githubusercontent.com/allenlo-dev/scripts/master/scripts/install-xray-vmess-caddy.sh) \  
+xx.xxxx.com \  
+9cf38986-5d2b-8158-1419-055ae1f90a08 \  
+myvless \  
+04b87b96-e511-dc35-3ce9-37e0ccd24bd8 \  
+myvmess  
+  
+12. 一键 xray vless 版本  
+注意：使用前，请先把域名a记录的IP地址设置正确  
+参数：  
+xx.xxxx.com                             域名  
+9cf38986-5d2b-8158-1419-055ae1f90a08    VLESS协议使用的ID  
+myvless                                 VLESS的ws路径  
+  
+bash <(curl -L -s https://raw.githubusercontent.com/allenlo-dev/scripts/master/scripts/install-xray-vless-caddy.sh) \  
+xx.xxxx.com \  
+9cf38986-5d2b-8158-1419-055ae1f90a08 \  
+myvless  
