@@ -126,6 +126,7 @@ function install_caddy() {
     setcap 'cap_net_bind_service=+ep' /usr/bin/caddy
 
     #add user
+    userdel -rf www-data
     useradd -r -d ${root_dir} -M -s /sbin/nologin www-data
 
     #create root and ssl dir
