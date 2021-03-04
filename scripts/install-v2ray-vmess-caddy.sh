@@ -214,6 +214,7 @@ EOF
 }
 
 #install caddy
+caddy_version=1
 function find_proxy_insert_line_1() {
     line_num=$(sed -n -e "/${domain} {/=" /etc/caddy/Caddyfile)
     end_num=$(sed -n '$=' /etc/caddy/Caddyfile)
@@ -236,9 +237,11 @@ function find_proxy_insert_line_1() {
         line_num=$(sed -n -e "/allen@${domain}/=" /etc/caddy/Caddyfile)
     else
         sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        if [ ${caddy_version} -eq 1 ]; then
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+        fi
         let line_num--
     fi
 
@@ -267,9 +270,11 @@ function find_proxy_insert_line_2() {
         line_num=$(sed -n -e "/allen@${domain}/=" /etc/caddy/Caddyfile)
     else
         sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
-        sed -i "${line_num} d" /etc/caddy/Caddyfile
+        if [ ${caddy_version} -eq 1 ]; then
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+            sed -i "${line_num} d" /etc/caddy/Caddyfile
+        fi
         let line_num--
     fi
 
@@ -277,6 +282,7 @@ function find_proxy_insert_line_2() {
 }
 
 function insert_proxy_to_caddy_v1() {
+    caddy_version=1
     find_proxy_insert_line_2
     line_num=$?
     sed -i "${line_num} a\  proxy ${vmess_path} 127.0.0.1:681 {" /etc/caddy/Caddyfile
@@ -307,6 +313,7 @@ function insert_proxy_to_caddy_v1() {
 }
 
 function insert_proxy_to_caddy_v2() { 
+    caddy_version=2
     find_proxy_insert_line_2
     line_num=$?
     sed -i "${line_num} a\  reverse_proxy ${vmess_path} 127.0.0.1:681" /etc/caddy/Caddyfile
