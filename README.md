@@ -45,7 +45,7 @@ xx.xxxx.com
 #chown -R git:git /home/git/gogs/custom/conf/app.ini  
 #service gogs restart  
   
-5. 一键临时邮箱 forsaken-mai  
+5. 一键临时邮箱 forsaken-mail  
 注意：VPS需要开启25端口, 这个直接发工单要主机商开启  
      域名解析, 如果你想邮件地址格式都为*@xx.com的形式, 则为xx.com设置MX记录  
 参数：  
