@@ -12,7 +12,7 @@ function judgment_param() {
     fi
 
     if [ ! -n "$2" ]; then
-        root_dir='/home/wwwroot'
+        root_dir='/var/www'
     else
         if [[ $2 =~ ^/.* ]]; then
             root_dir=$2
@@ -93,7 +93,7 @@ function install_os_pkgage() {
 function install_gogs() {
     if [ ! -e /etc/init.d/gogs ]; then
         service gogs stop
-        rm -rf /home/git/gogs*
+        rm -rf /var/www/gogs*
     fi
 
     #add user git and set passwd --> Ny!|2n+Tl!c9
@@ -102,17 +102,19 @@ function install_gogs() {
     echo 'git:Ny!|2n+Tl!c9' | chpasswd
 
     #install gogs
-    wget -qO gogs-pkg.tar.gz https://github.com/allenlo-dev/scripts/raw/master/rpm/gogs_0.12.3_linux_amd64.tar.gz
-    tar -xzf gogs-pkg.tar.gz -C /home/git
-    chown -R git:git /home/git
+    wget -qO gogs-pkg.tar.gz https://dl.gogs.io/0.12.3/gogs_0.12.3_linux_amd64.tar.gz
+    tar -xzf gogs-pkg.tar.gz -C /var/www
+    chown -R git:git /var/www/gogs
 
     #auto run gogs
     if [[ x"${release}" == x"centos" ]]; then
-        \cp -f /home/git/gogs/scripts/init/centos/gogs /etc/init.d
+        \cp -f /var/www/gogs/scripts/init/centos/gogs /etc/init.d
+        sed -i "s/WORKINGDIR=\/home\/git\/gogs/WORKINGDIR=\/var\/www\/gogs/g" /etc/init.d/gogs
         chmod 774 /etc/init.d/gogs
         chkconfig gogs on
     else
-        \cp -f /home/git/gogs/scripts/init/debian/gogs /etc/init.d
+        \cp -f /var/www/gogs/scripts/init/debian/gogs /etc/init.d
+        sed -i "s/WORKINGDIR=\/home\/git\/gogs/WORKINGDIR=\/var\/www\/gogs/g" /etc/init.d/gogs
         chmod 774 /etc/init.d/gogs
         rm -f /etc/rc3.d/S02gogs
         ln -s /etc/init.d/gogs  /etc/rc3.d/S02gogs

@@ -12,7 +12,7 @@ function judgment_param() {
     fi
 
     if [ ! -n "$2" ]; then
-        root_dir='/home/wwwroot'
+        root_dir='/var/www'
     else
         root_dir=$2
     fi
@@ -121,13 +121,13 @@ function install_caddy() {
     fi
 
     #curl https://getcaddy.com | bash -s personal
-    wget -qO caddy2-pkg.tar.gz https://github.com/caddyserver/caddy/releases/download/v2.2.1/caddy_2.2.1_linux_amd64.tar.gz
+    wget -qO caddy2-pkg.tar.gz https://github.com/caddyserver/caddy/releases/download/v2.4.5/caddy_2.4.5_mac_amd64.tar.gz
     tar xzf caddy2-pkg.tar.gz -C /usr/bin caddy
     setcap 'cap_net_bind_service=+ep' /usr/bin/caddy
 
     #add user
     userdel -rf www-data
-    useradd -r -d ${root_dir} -M -s /sbin/nologin www-data
+    useradd -r -d ${root_dir}/www-data -M -s /sbin/nologin www-data
 
     #create root and ssl dir
     if [ ! -d "${root_dir}/${domain}" ]; then
