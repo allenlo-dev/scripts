@@ -120,7 +120,7 @@ function install_caddy() {
     fi
 
     #curl https://getcaddy.com | bash -s personal
-    wget -qO caddy_v1.0.4_linux_amd64.tar.gz https://github.com/allenlo-dev/scripts/raw/master/rpm/caddy_v1.0.4_linux_amd64.tar.gz
+    curl -L -O  https://github.com/allenlo-dev/scripts/raw/master/rpm/caddy_v1.0.4_linux_amd64.tar.gz
     tar xzf caddy_v1.0.4_linux_amd64.tar.gz -C /usr/bin caddy
     setcap 'cap_net_bind_service=+ep' /usr/bin/caddy
 

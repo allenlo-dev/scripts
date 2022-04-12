@@ -102,19 +102,17 @@ function install_gogs() {
     echo 'git:Ny!|2n+Tl!c9' | chpasswd
 
     #install gogs
-    wget -qO gogs-pkg.tar.gz https://dl.gogs.io/0.12.3/gogs_0.12.3_linux_amd64.tar.gz
-    tar -xzf gogs-pkg.tar.gz -C /var/www
-    chown -R git:git /var/www/gogs
+    curl -L -O https://dl.gogs.io/0.12.6/gogs_0.12.6_linux_amd64.tar.gz
+    tar -xzf gogs_0.12.6_linux_amd64.tar.gz -C /home/git
+    chown -R git:git /home/git
 
     #auto run gogs
     if [[ x"${release}" == x"centos" ]]; then
-        \cp -f /var/www/gogs/scripts/init/centos/gogs /etc/init.d
-        sed -i "s/WORKINGDIR=\/home\/git\/gogs/WORKINGDIR=\/var\/www\/gogs/g" /etc/init.d/gogs
+        \cp -f /home/git/gogs/scripts/init/centos/gogs /etc/init.d
         chmod 774 /etc/init.d/gogs
         chkconfig gogs on
     else
-        \cp -f /var/www/gogs/scripts/init/debian/gogs /etc/init.d
-        sed -i "s/WORKINGDIR=\/home\/git\/gogs/WORKINGDIR=\/var\/www\/gogs/g" /etc/init.d/gogs
+        \cp -f /home/git/gogs/scripts/init/debian/gogs /etc/init.d
         chmod 774 /etc/init.d/gogs
         rm -f /etc/rc3.d/S02gogs
         ln -s /etc/init.d/gogs  /etc/rc3.d/S02gogs

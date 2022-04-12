@@ -121,8 +121,8 @@ function install_caddy() {
     fi
 
     #curl https://getcaddy.com | bash -s personal
-    wget -qO caddy2-pkg.tar.gz https://github.com/caddyserver/caddy/releases/download/v2.4.5/caddy_2.4.5_mac_amd64.tar.gz
-    tar xzf caddy2-pkg.tar.gz -C /usr/bin caddy
+    curl -L -O  https://raw.githubusercontent.com/allenlo-dev/scripts/master/rpm/caddy_2.4.6_linux_amd64.tar.gz
+    tar xzf caddy_2.4.6_linux_amd64.tar.gz -C /usr/bin caddy
     setcap 'cap_net_bind_service=+ep' /usr/bin/caddy
 
     #add user
