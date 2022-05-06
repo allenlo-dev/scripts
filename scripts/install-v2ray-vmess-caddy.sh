@@ -169,7 +169,7 @@ cat << EOF > $json_path
           {
             "id": "${vless_id}",
             "level": 1,
-            "alterId": 64
+            "alterId": 0
           }
         ]
       },
@@ -191,7 +191,7 @@ cat << EOF > $json_path
           {
             "id": "${vmess_id}",
             "level": 1,
-            "alterId": 64
+            "alterId": 0
           }
         ]
       },
