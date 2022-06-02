@@ -3,6 +3,7 @@
 domain=""
 root_dir=""
 fastcgi_gw=""
+git_passwd=""
 function judgment_param() {
     #Demo function for processing param
     if [ ! -n "$1" ]; then
@@ -87,6 +88,12 @@ function install_os_pkgage() {
     if ! which git > /dev/null; then
         ${installer} install git
     fi
+
+    if ! which openssl > /dev/null; then
+        git_passwd="Ny!|2n+Tl!c9"
+    else
+        git_passwd=$(openssl rand -base64 12)
+    fi
 }
 
 #install gogs
@@ -99,11 +106,11 @@ function install_gogs() {
     #add user git and set passwd --> Ny!|2n+Tl!c9
     userdel -rf git
     useradd -m -s /bin/bash git
-    echo 'git:Ny!|2n+Tl!c9' | chpasswd
+    echo "git:$git_passwd" | chpasswd
 
     #install gogs
-    curl -L -O https://dl.gogs.io/0.12.6/gogs_0.12.6_linux_amd64.tar.gz
-    tar -xzf gogs_0.12.6_linux_amd64.tar.gz -C /home/git
+    curl -L -O https://dl.gogs.io/0.12.8/gogs_0.12.8_linux_amd64.tar.gz
+    tar -xzf gogs_0.12.8_linux_amd64.tar.gz -C /home/git
     chown -R git:git /home/git
 
     #auto run gogs
