@@ -104,12 +104,12 @@ function install_php() {
         sed -i "s/caddy/www-data/g" /etc/php-fpm.d/www.conf
     elif [[ x"${release}" == x"debian" ]]; then
         ${installer} update
-        ${installer} install unzip php7.3 php7.3-cli php7.3-fpm php7.3-common php7.3-dev php7.3-gd
-        #${installer} install php7.3-xml php7.3-ldap php7.3-mbstring
+        ${installer} install unzip php7.4 php7.4-cli php7.4-fpm php7.4-common php7.4-dev php7.4-gd
+        #${installer} install php7.4-xml php7.4-ldap php7.4-mbstring
     
-        php_fpm='php7.3-fpm'
-        sed -i "s/apache/www-data/g" /etc/php/7.3/fpm/pool.d/www.conf
-        sed -i "s/caddy/www-data/g" /etc/php/7.3/fpm/pool.d/www.conf
+        php_fpm='php7.4-fpm'
+        sed -i "s/apache/www-data/g" /etc/php/7.4/fpm/pool.d/www.conf
+        sed -i "s/caddy/www-data/g" /etc/php/7.4/fpm/pool.d/www.conf
     else
         echo 'OS is not be supported...'
         exit 1
@@ -128,7 +128,7 @@ function find_proxy_insert_line() {
 
     find_result=0
     while [ ${line_num} -le ${end_num} ]; do
-        let line_num++
+        let line_num+				
         proxy_str=$(sed -n "${line_num}p" /etc/caddy/Caddyfile)
         if [ "${proxy_str}" == "}" ]; then
             break
@@ -222,14 +222,13 @@ ${domain} {
   }
   root * ${root_dir}/${domain}
   tls allen@${domain}
-  php_fastcgi /* $fastcgi_gw
-  @try_files {
-    file {
-      try_files {path}/index.html {path}/index.php /_h5ai/public/index.php
-      split_path .php
-    }
+  php_fastcgi $fastcgi_gw
+  # If the requested file does not exist, try index files	
+  @indexFiles file {
+    try_files {path} {path}/index.php index.php /_h5ai/public/index.php
+    split_path .php
   }
-  rewrite @try_files {http.matchers.file.relative}
+  rewrite @indexFiles {http.matchers.file.relative}
 }
 EOF
 }
@@ -241,6 +240,8 @@ function update_php_fpm() {
             fastcgi_gw='unix//run/php/php7.2-fpm.sock php'
         elif [ -e /run/php/php7.3-fpm.sock ]; then
             fastcgi_gw='unix//run/php/php7.3-fpm.sock php'
+        elif [ -e /run/php/php7.4-fpm.sock ]; then
+            fastcgi_gw='unix///run/php/php7.4-fpm.sock php'
         else
             fastcgi_gw='127.0.0.1:9000 php'
         fi
@@ -249,6 +250,8 @@ function update_php_fpm() {
             fastcgi_gw='unix//run/php/php7.2-fpm.sock'
         elif [ -e /run/php/php7.3-fpm.sock ]; then
             fastcgi_gw='unix//run/php/php7.3-fpm.sock'
+        elif [ -e /run/php/php7.4-fpm.sock ]; then
+            fastcgi_gw='unix///run/php/php7.4-fpm.sock'
         else
             fastcgi_gw='127.0.0.1:9000'
         fi

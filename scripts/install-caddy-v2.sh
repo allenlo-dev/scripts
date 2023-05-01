@@ -121,13 +121,13 @@ function install_caddy() {
     fi
 
     #curl https://getcaddy.com | bash -s personal
-    curl -L -O  https://raw.githubusercontent.com/allenlo-dev/scripts/master/rpm/caddy_2.4.6_linux_amd64.tar.gz
+    curl -L -O  https://github.com/caddyserver/caddy/releases/download/v2.6.4/caddy_2.6.4_linux_arm64.tar.gz
     tar xzf caddy_2.4.6_linux_amd64.tar.gz -C /usr/bin caddy
     setcap 'cap_net_bind_service=+ep' /usr/bin/caddy
 
     #add user
     userdel -rf www-data
-    useradd -r -d ${root_dir}/www-data -M -s /sbin/nologin www-data
+    useradd -r -d ${root_dir} -M -s /sbin/nologin www-data
 
     #create root and ssl dir
     if [ ! -d "${root_dir}/${domain}" ]; then

@@ -114,15 +114,15 @@ function install_forsaken_mail() {
     rm -f /usr/bin/npm
     rm -f /usr/bin/pm2
     
-    wget https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.xz
-    xz -d node-v12.16.3-linux-x64.tar.xz
-    tar -xf node-v12.16.3-linux-x64.tar
-    ln -s ~/node-v12.16.3-linux-x64/bin/node /usr/bin/node
-    ln -s ~/node-v12.16.3-linux-x64/bin/npm /usr/bin/npm
+    wget https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x64.tar.xz
+    xz -d node-v18.16.0-linux-x64.tar.xz
+    tar -xf node-v18.16.0-linux-x64.tar
+    ln -s ~/node-v18.16.0-linux-x64/bin/node /usr/bin/node
+    ln -s ~/node-v18.16.0-linux-x64/bin/npm /usr/bin/npm
 
     #install pm2.
     npm install pm2 -g
-    ln -s ~/node-v12.16.3-linux-x64/bin/pm2 /usr/bin/pm2
+    ln -s ~/node-v18.16.0-linux-x64/bin/pm2 /usr/bin/pm2
 
     #install forsaken mail.
     git clone https://github.com/denghongcai/forsaken-mail.git
