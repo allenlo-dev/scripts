@@ -72,7 +72,7 @@ function install_os_pkgage() {
         fi
 
         if ! which ntpdate > /dev/null; then
-            ${installer} install ntp ntpdate
+            ${installer} install ntp ntpdate ntpsec-ntpdate
         fi
     else
         if ! which cron > /dev/null || ! which ntpdate > /dev/null; then
@@ -84,7 +84,7 @@ function install_os_pkgage() {
         fi
 
         if ! which ntpdate > /dev/null; then
-            ${installer} install ntp ntpdate
+            ${installer} install ntp ntpdate ntpsec-ntpdate
         fi
     fi
 

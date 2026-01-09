@@ -142,3 +142,4 @@ EOF
 check_os_type
 reset_vimrc
 reset_bashrc
+echo "set mouse=" > ~/.vimrc
