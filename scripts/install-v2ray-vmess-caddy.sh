@@ -1,8 +1,8 @@
 #!/bin/bash
 
 domain=""
-trojan_passwd=""
-trojan_path=""
+vless_id=""
+vless_path=""
 vmess_id=""
 vmess_path=""
 
@@ -16,18 +16,18 @@ function judgment_param() {
     fi
 
     if [ ! -n "$2" ]; then
-        trojan_passwd='M&~buTYoeSavlu-C0PRaGTsR'
+        vless_id='26E3EA30-57B3-95C7-3424-2FD8EEFB814C'
     else
-        trojan_passwd=$2
+        vless_id=$2
     fi
 
     if [ ! -n "$3" ]; then
-        trojan_path='/troa'
+        vless_path='/less'
     else
         if [[ $3 =~ ^/.* ]]; then
-            trojan_path=$3
+            vless_path=$3
         else
-            trojan_path="/$3"
+            vless_path="/$3"
         fi
     fi
 
@@ -125,7 +125,7 @@ function install_os_pkgage() {
     fi
 
     if ! which ntpdate > /dev/null; then
-        ${installer} install ntp ntpdate ntpsec-ntpdate
+        ${installer} install ntp ntpdate
     fi
 }
 
@@ -158,64 +158,57 @@ function install_v2ray() {
 
 cat << EOF > $json_path
 {
-    "inbounds": [
-        {
-            "port": 1521,
-            "listen": "127.0.0.1",
-            "protocol": "trojan",
-            "settings": {
-                "decryption": "none",
-                "clients": [
-                    {
-                        "email": "atro@${domain}",
-                        "password": "${trojan_passwd}"
-                    }
-                ]
-            },
-            "streamSettings": {
-                "network": "ws",
-                "security": "none",
-                "wsSettings": {
-                    "path": "${trojan_path}"
-                }
-            },
-            "sniffing": {
-                "enabled": true,
-                "destOverride": [
-                    "http",
-                    "tls"
-                ]
-            }
+  "inbounds": [
+    {
+      "port": 1521,
+      "listen":"127.0.0.1",
+      "protocol": "vless",
+      "settings": {
+        "decryption": "none",
+        "clients": [
+          {
+            "id": "${vless_id}",
+            "level": 1,
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "${vless_path}"
         }
-    ],
-    "inboundDetour": [
-        {
-            "port": 681,
-            "listen": "127.0.0.1",
-            "protocol": "vmess",
-            "settings": {
-                "clients": [
-                    {
-                        "id": "${vmess_id}",
-                        "level": 1,
-                        "alterId": 0
-                    }
-                ]
-            },
-            "streamSettings": {
-                "network": "ws",
-                "wsSettings": {
-                    "path": "${vmess_path}"
-                }
-            }
+      }
+    }
+  ],
+  "inboundDetour": [
+    {
+      "port": 681,
+      "listen": "127.0.0.1",
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "${vmess_id}",
+            "level": 1,
+            "alterId": 0
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "${vmess_path}"
         }
-    ],
-    "outbounds": [
-        {
-            "protocol": "freedom",
-            "settings": {}
-        }
-    ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
 }
 EOF
 }
@@ -306,7 +299,7 @@ function insert_proxy_to_caddy_v1() {
 
     find_proxy_insert_line_1
     line_num=$?
-    sed -i "${line_num} a\  proxy ${trojan_path} 127.0.0.1:1521 {" /etc/caddy/Caddyfile
+    sed -i "${line_num} a\  proxy ${vless_path} 127.0.0.1:1521 {" /etc/caddy/Caddyfile
     let line_num++
 
     sed -i "${line_num} a\    websocket" /etc/caddy/Caddyfile
@@ -327,7 +320,7 @@ function insert_proxy_to_caddy_v2() {
 
     find_proxy_insert_line_1
     line_num=$?
-    sed -i "${line_num} a\  reverse_proxy ${trojan_path} 127.0.0.1:1521" /etc/caddy/Caddyfile
+    sed -i "${line_num} a\  reverse_proxy ${vless_path} 127.0.0.1:1521" /etc/caddy/Caddyfile
 }
 
 function append_domain_to_caddy_v1() {
@@ -336,7 +329,7 @@ ${domain} {
   log stdout
   root ${root_dir}/${domain}
   tls allen@${domain}
-  proxy ${trojan_path} 127.0.0.1:1521 {
+  proxy ${vless_path} 127.0.0.1:1521 {
     websocket
     header_upstream -Origin
   }
@@ -356,7 +349,7 @@ ${domain} {
   }
   root * ${root_dir}/${domain}
   tls allen@${domain}
-  reverse_proxy ${trojan_path} 127.0.0.1:1521
+  reverse_proxy ${vless_path} 127.0.0.1:1521
   reverse_proxy ${vmess_path} 127.0.0.1:681
 }
 EOF
@@ -390,17 +383,17 @@ function install_caddy_firewall() {
     echo -e "\033[36m------------- Caddy Config ---------------\033[0m"
     cat /etc/caddy/Caddyfile
     echo ""
-    echo -e "\033[36m------- V2RAY Host Settings(Trojan) ------\033[0m"
+    echo -e "\033[36m------- V2RAY Host Settings(VLESS) -------\033[0m"
     echo "Address:    ${domain}"
     echo "Port:       443"
-    echo "PWD:        ${trojan_passwd}"
-    echo "FLow:       xtls-rprx-vision"
+    echo "ID:         ${vless_id}"
+    echo "FLow:       xtls-rprx-origin"
     echo "Encryption: none"
     echo -e "\033[36m-------- V2RAY Transport Settings --------\033[0m"
     echo "Network:    ws"
     echo "Type:       none"
     echo "Host:       ${domain}"
-    echo "Path        ${trojan_path}"
+    echo "Path        ${vless_path}"
     echo "TLS: tls    AllowInsecure: false"
     echo ""
     echo -e "\033[36m------- V2RAY Host Settings(VMESS) -------\033[0m"
