@@ -148,7 +148,6 @@ function install_caddy() {
 ${domain} {
   log {
     output stdout
-    format single_field common_log
   }
   root * ${root_dir}/${domain}
   tls allen@${domain} 

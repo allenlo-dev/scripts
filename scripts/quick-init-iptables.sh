@@ -62,6 +62,7 @@ function install_os_pkgage() {
 #config iptables rules.
 function config_iptables_rules() {
     wget -qO /etc/iptables.rules https://raw.githubusercontent.com/allenlo-dev/scripts/master/rpm/iptables.rules 
+    update-alternatives --set iptables /usr/sbin/iptables-legacy
     touch /etc/network/if-pre-up.d/iptablesload
     chmod +x /etc/network/if-pre-up.d/iptablesload
 cat << 'EOF' > /etc/network/if-pre-up.d/iptablesload

@@ -27,6 +27,7 @@ if ! which BaiduPCS-Go > /dev/null; then
     chmod +x /usr/bin/BaiduPCS-Go
 
     #BDUSS 与 STOKEN 可通过 FireFox 打开百度网盘页，然后按 F12 查看 Cookie 得到
+    BaiduPCS-Go config set -appid 266719
     BaiduPCS-Go login -bduss=Q21zUGIwTndGS1NuaFpwSVFBQUFBJCQFkYXF-clhsU3J-Q21zUGIwTndGS1NuaFpwSVFBQUFBJCQAAAAAAAAAAAEAAACL6EIkYWxsZW5fbHNoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJIR72iSEe9ob -stoken=2e2dcb36b941566bf2dadd041e1ef9d0157d0bb865da1ac0d92bb148844f51aa
 fi
 
@@ -46,7 +47,7 @@ chown git:git ${backup_file_name}
 
 #BaiduPCS-Go cd /apps/bypy
 #BaiduPCS-Go ls
-BaiduPCS-Go upload /mnt/tfcard/cloud /apps/bypy
+BaiduPCS-Go upload ${backup_file_name} /apps/bypy
 
 echo "GoGS Cloud Backup Success..."
 reboot
